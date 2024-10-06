@@ -3,7 +3,7 @@ require('neo-tree').setup({
         "filesystem",
         "buffers",
         "git_status",
-        -- "document_symbols",
+        "document_symbols",
     },
     add_blank_line_at_top = false,            -- Add a blank line at the top of the tree.
     auto_clean_after_session_restore = false, -- Automatically clean up broken neo-tree buffers saved in sessions
@@ -17,7 +17,6 @@ require('neo-tree').setup({
     enable_modified_markers = true,        -- Show markers for files with unsaved changes.
     enable_opened_markers = true,          -- Enable tracking of opened files. Required for `components.name.highlight_opened_files`
     enable_refresh_on_write = true,        -- Refresh the tree when a file is written. Only used if `use_libuv_file_watcher` is false.
-    enable_normal_mode_for_inputs = false, -- Enable normal mode for input dialogs.
     git_status_async = true,
     -- These options are for people with VERY large git repos
     git_status_async_options = {
@@ -85,78 +84,86 @@ require('neo-tree').setup({
         highlight_separator_active = "NeoTreeTabSeparatorActive",
     },
     --
-    --event_handlers = {
-    --  {
-    --    event = "before_render",
-    --    handler = function (state)
-    --      -- add something to the state that can be used by custom components
-    --    end
-    --  },
-    --  {
-    --    event = "file_opened",
-    --    handler = function(file_path)
-    --      --auto close
-    --      require("neo-tree.command").execute({ action = "close" })
-    --    end
-    --  },
-    --  {
-    --    event = "file_opened",
-    --    handler = function(file_path)
-    --      --clear search after opening a file
-    --      require("neo-tree.sources.filesystem").reset_search()
-    --    end
-    --  },
-    --  {
-    --    event = "file_renamed",
-    --    handler = function(args)
-    --      -- fix references to file
-    --      print(args.source, " renamed to ", args.destination)
-    --    end
-    --  },
-    --  {
-    --    event = "file_moved",
-    --    handler = function(args)
-    --      -- fix references to file
-    --      print(args.source, " moved to ", args.destination)
-    --    end
-    --  },
-    --  {
-    --    event = "neo_tree_buffer_enter",
-    --    handler = function()
-    --      vim.cmd 'highlight! Cursor blend=100'
-    --    end
-    --  },
-    --  {
-    --    event = "neo_tree_buffer_leave",
-    --    handler = function()
-    --      vim.cmd 'highlight! Cursor guibg=#5f87af blend=0'
-    --    end
-    --  },
-    -- {
-    --   event = "neo_tree_window_before_open",
-    --   handler = function(args)
-    --     print("neo_tree_window_before_open", vim.inspect(args))
-    --   end
-    -- },
-    -- {
-    --   event = "neo_tree_window_after_open",
-    --   handler = function(args)
-    --     vim.cmd("wincmd =")
-    --   end
-    -- },
-    -- {
-    --   event = "neo_tree_window_before_close",
-    --   handler = function(args)
-    --     print("neo_tree_window_before_close", vim.inspect(args))
-    --   end
-    -- },
-    -- {
-    --   event = "neo_tree_window_after_close",
-    --   handler = function(args)
-    --     vim.cmd("wincmd =")
-    --   end
-    -- }
-    --},
+    event_handlers = {
+        {
+            event = "neo_tree_popup_input_ready",
+            ---@param args { bufnr: integer, winid: integer }
+            handler = function(args)
+                vim.cmd("stopinsert")
+                vim.keymap.set("i", "<esc>", vim.cmd.stopinsert, { noremap = true, buffer = args.bufnr })
+            end,
+        },
+        --  {
+        --    event = "before_render",
+        --    handler = function (state)
+        --      -- add something to the state that can be used by custom components
+        --    end
+        --  },
+        --  {
+        --    event = "file_opened",
+        --    handler = function(file_path)
+        --      --auto close
+        --      require("neo-tree.command").execute({ action = "close" })
+        --    end
+        --  },
+        --  {
+        --    event = "file_opened",
+        --    handler = function(file_path)
+        --      --clear search after opening a file
+        --      require("neo-tree.sources.filesystem").reset_search()
+        --    end
+        --  },
+        --  {
+        --    event = "file_renamed",
+        --    handler = function(args)
+        --      -- fix references to file
+        --      print(args.source, " renamed to ", args.destination)
+        --    end
+        --  },
+        --  {
+        --    event = "file_moved",
+        --    handler = function(args)
+        --      -- fix references to file
+        --      print(args.source, " moved to ", args.destination)
+        --    end
+        --  },
+        --  {
+        --    event = "neo_tree_buffer_enter",
+        --    handler = function()
+        --      vim.cmd 'highlight! Cursor blend=100'
+        --    end
+        --  },
+        --  {
+        --    event = "neo_tree_buffer_leave",
+        --    handler = function()
+        --      vim.cmd 'highlight! Cursor guibg=#5f87af blend=0'
+        --    end
+        --  },
+        -- {
+        --   event = "neo_tree_window_before_open",
+        --   handler = function(args)
+        --     print("neo_tree_window_before_open", vim.inspect(args))
+        --   end
+        -- },
+        -- {
+        --   event = "neo_tree_window_after_open",
+        --   handler = function(args)
+        --     vim.cmd("wincmd =")
+        --   end
+        -- },
+        -- {
+        --   event = "neo_tree_window_before_close",
+        --   handler = function(args)
+        --     print("neo_tree_window_before_close", vim.inspect(args))
+        --   end
+        -- },
+        -- {
+        --   event = "neo_tree_window_after_close",
+        --   handler = function(args)
+        --     vim.cmd("wincmd =")
+        --   end
+        -- }
+    },
     default_component_configs = {
         container = {
             enable_character_fade = true,
@@ -331,7 +338,7 @@ require('neo-tree').setup({
 
     window = {                     -- see https://github.com/MunifTanjim/nui.nvim/tree/main/lua/nui/popup for
         -- possible options. These can also be functions that return these options.
-        position = "left",         -- left, right, top, bottom, float, current
+        position = "current",      -- left, right, top, bottom, float, current
         width = 40,                -- applies to left and right positions
         height = 15,               -- applies to top and bottom positions
         auto_expand_width = false, -- expand the window when file exceeds the window width. does not work with position = "float"
@@ -344,8 +351,8 @@ require('neo-tree').setup({
             -- you can also specify border here, if you want a different setting from
             -- the global popup_border_style.
         },
-        same_level = false,  -- Create and paste/move files/directories on the same level as the directory under cursor (as opposed to within the directory under cursor).
-        insert_as = "child", -- Affects how nodes get inserted into the tree during creation/pasting/moving of files if the node under the cursor is a directory:
+        same_level = false,    -- Create and paste/move files/directories on the same level as the directory under cursor (as opposed to within the directory under cursor).
+        insert_as = "sibling", -- Affects how nodes get inserted into the tree during creation/pasting/moving of files if the node under the cursor is a directory:
         -- "child":   Insert nodes as children of the directory under cursor.
         -- "sibling": Insert nodes  as siblings of the directory under cursor.
         -- Mappings for tree window. See `:h neo-tree-mappings` for a list of built-in commands.

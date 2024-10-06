@@ -3,10 +3,6 @@ vim.g.mapleader = ' '
 vim.keymap.set('v', 'K', ':m \'<-2<CR>gv=gv')
 vim.keymap.set('v', 'J', ':m \'>+1<CR>gv=gv')
 
-vim.keymap.set('n', '<Leader>b', vim.cmd.Buffers)
-
-vim.keymap.set('n', '<Leader><Leader>', vim.cmd.so)
-
 vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<C-u>', '<C-u>zz')
 
@@ -79,6 +75,7 @@ Plug 'rafamadriz/friendly-snippets'
 
 Plug('williamboman/mason.nvim', { ['do'] = ':MasonUpdate' })
 Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'stevearc/conform.nvim'
 
 Plug 'folke/trouble.nvim'
 Plug 'b0o/schemastore.nvim'
@@ -99,4 +96,8 @@ Plug 'folke/noice.nvim'
 
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-sensible'
+
+Plug 'github/copilot.vim'
+
+
 vim.call('plug#end')

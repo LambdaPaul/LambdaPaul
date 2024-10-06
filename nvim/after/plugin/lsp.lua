@@ -11,7 +11,7 @@ vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
 -- )
 
 
-require('luasnip.loaders.from_vscode').lazy_load()
+require 'luasnip.loaders.from_vscode'.lazy_load()
 
 local cmp = require('cmp')
 local lspkind = require('lspkind')
@@ -76,8 +76,37 @@ lsp_defaults.capabilities = vim.tbl_deep_extend(
     require 'cmp_nvim_lsp'.default_capabilities()
 )
 
+lsp_config.lua_ls.setup {
+    on_init = function(client)
+        local path = client.workspace_folders[1].name
+        if vim.loop.fs_stat(path .. '/.luarc.json') or vim.loop.fs_stat(path .. '/.luarc.jsonc') then
+            return
+        end
 
-lsp_config.lua_ls.setup({})
+        client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+            runtime = {
+                -- Tell the language server which version of Lua you're using
+                -- (most likely LuaJIT in the case of Neovim)
+                version = 'LuaJIT'
+            },
+            -- Make the server aware of Neovim runtime files
+            workspace = {
+                checkThirdParty = false,
+                library = {
+                    vim.env.VIMRUNTIME
+                    -- Depending on the usage, you might want to add additional paths here.
+                    -- "${3rd}/luv/library"
+                    -- "${3rd}/busted/library",
+                }
+                -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
+                -- library = vim.api.nvim_get_runtime_file("", true)
+            }
+        })
+    end,
+    settings = {
+        Lua = {}
+    }
+}
 
 lsp_config.jsonls.setup {
     settings = {
@@ -93,3 +122,5 @@ lsp_config.rust_analyzer.setup {}
 lsp_config.clangd.setup {}
 lsp_config.eslint.setup {}
 lsp_config.tsserver.setup {}
+lsp_config.gopls.setup {}
+lsp_config.ols.setup {}
